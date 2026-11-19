@@ -87,6 +87,12 @@
     .tip { color:#82958a; font:9px var(--mono); }
     .toast { min-height:18px; margin:9px 2px 0; color:var(--mint); font:9px var(--mono); }
     .footer { padding:12px 4px 0; display:flex; justify-content:space-between; gap:12px; color:#6e8276; font:9px var(--mono); }
+    .intro-screen { position:fixed; z-index:20; inset:0; display:grid; place-items:center; overflow:hidden; padding:18px; background:#030806; }
+    .intro-screen[hidden] { display:none; }
+    .intro-screen video { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#030806; }
+    .intro-screen::after { content:''; position:absolute; inset:55% 0 0; pointer-events:none; background:linear-gradient(transparent,rgba(0,0,0,.68)); }
+    .skip-intro { position:absolute; z-index:1; right:max(18px,env(safe-area-inset-right)); bottom:max(18px,env(safe-area-inset-bottom)); min-height:48px; padding:0 20px; border:1px solid rgba(255,255,255,.45); border-radius:999px; background:rgba(5,15,11,.82); color:#fff; font-weight:800; cursor:pointer; touch-action:manipulation; }
+    .skip-intro:hover,.skip-intro:focus-visible { border-color:var(--green); color:var(--green); }
     @media(max-width:680px) {
       body { padding:9px 9px max(16px,env(safe-area-inset-bottom)); }
       .top { margin-bottom:11px; }
@@ -113,6 +119,12 @@
   </style>
 </head>
 <body>
+  <section class="intro-screen" id="introScreen" aria-label="Game intro">
+    <video id="introVideo" autoplay muted playsinline preload="auto" aria-label="Sky Patrol intro video">
+      <source src="../video/Spaceship_firing_lasers_in_battle_2310d8bf.mp4" type="video/mp4">
+    </video>
+    <button class="skip-intro" id="skipIntro" type="button">Skip intro ↗</button>
+  </section>
   <main class="wrap">
     <header class="top"><a class="brand" href="./game.html"><span class="brand-icon">✈</span><span>Sky Patrol</span></a><span class="back">ARCADE FLIGHT GAME</span></header>
     <section class="panel glass menu" id="menuScreen">
@@ -173,6 +185,12 @@
       const $ = (selector) => document.querySelector(selector);
       const canvas = $('#gameCanvas'), ctx = canvas.getContext('2d');
       const menuScreen = $('#menuScreen'), gameScreen = $('#gameScreen'), resultOverlay = $('#resultOverlay');
+      const introScreen = $('#introScreen'), introVideo = $('#introVideo');
+      function finishIntro(){if(introScreen.hidden)return;introScreen.hidden=true;introVideo.pause();}
+      $('#skipIntro').addEventListener('click',finishIntro);
+      introVideo.addEventListener('ended',finishIntro);
+      introVideo.addEventListener('error',finishIntro);
+      introVideo.play().catch(()=>{});
       const storeKey = 'skyPatrolCampaignV1';
       let progress = readLocal();
       let selectedJet = 'wasp', selectedArena = 'canopy', selectedStage = progress.stage || 1;

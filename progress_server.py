@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -113,8 +114,9 @@ class GameHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Serve Sky Patrol and save campaign progress.")
-    parser.add_argument("--host", default="127.0.0.1", help="Bind address (default: 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000)")
+    # Default to 0.0.0.0 for Render, but fallback to 127.0.0.1 for local testing
+    parser.add_argument("--host", default=os.environ.get("HOST", "0.0.0.0"), help="Bind address")
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8000)), help="Port")
     args = parser.parse_args()
 
     server = ThreadingHTTPServer((args.host, args.port), GameHandler)
